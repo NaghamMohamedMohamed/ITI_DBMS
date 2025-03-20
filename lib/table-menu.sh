@@ -1,11 +1,11 @@
 #!/bin/bash  
 
-# Import the tables & records functions
+# Import the tables & records/Columns functions
 source ./lib/tables-operations.sh 
 source ./lib/records-columns-operations.sh
 
 
-#cThe sub menu for table , records , columns operations after connecting to specific DB
+# The sub menu for table , records , columns operations after connecting to specific DB
 
 function sub_menu
 {
