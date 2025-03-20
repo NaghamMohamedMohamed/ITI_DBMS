@@ -24,7 +24,7 @@ function main_menu
             2) list_db ;;
             3) connect_to_db ;;
             4) drop_db ;;
-            5) echo "Exiting..."; exit 0 ;;
+            5) echo "Exiting The DBMS ..."; exit 0 ;;
             *) echo "Invalid choice. Please try again." ;;
         esac       
         echo  

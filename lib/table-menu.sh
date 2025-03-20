@@ -6,9 +6,11 @@ source ./lib/records-columns-operations.sh
 
 
 # The sub menu for table , records , columns operations after connecting to specific DB
-
 function sub_menu
 {
+    # Clears the screen for a fresh menu display
+    clear
+
     while true ; do
         echo "======================"
         echo "Bash DBMS - Sub Menu "
