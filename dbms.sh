@@ -1,12 +1,9 @@
-# This is the main script ( entry point which will be runned ) for displaying the main menu and redirecting to each option function 
-# found inthe  other file ( of the DB Operation : Create , List , Connect , Drop )
-
 #!/bin/bash  
 
 # Import the database functions
 source ./lib/db-operations.sh 
 
-
+# Function to display the main menu
 function main_menu
 {
     while true ; do
