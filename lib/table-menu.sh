@@ -1,6 +1,7 @@
 #!/bin/bash  
 
 # Import the tables & records/Columns functions
+source ../dbms.sh
 source ./lib/tables-operations.sh 
 source ./lib/records-columns-operations.sh
 
@@ -35,7 +36,13 @@ function sub_menu
             5) insert_into_table ;;
             6) select_from_table ;;
             7) delete_from_table ;;
-            8) echo "Exiting..."; exit 0 ;;
+            8)
+                echo "Returning To The Main Menu..."
+                sleep 1
+                clear
+                main_menu 
+                return
+                ;;
             *) echo "Invalid choice. Please try again." ;;
         esac       
         echo  
