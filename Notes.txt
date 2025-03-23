@@ -1,0 +1,27 @@
+📂 dbms_project/          # Main Github Repo
+│── dbms.sh               # Main script (entry point)
+│── 📂 lib/
+│   │── database.sh       # Handles databases (create, list, drop, connect)
+│   │── table.sh          # Handles tables (create, list, drop,update) 
+│   │── records.sh        # Handles records (insert, select, delete) 
+│   │── validation.sh     # Validates input (data types, primary keys)
+│   │── table_menu.sh     # Table & Records Operations Menu
+│── 📂 databases/         # Stores user-created databases
+|── README.md             # Read me file doc.
+
+
+
+
+- dbms.sh : This is the main script ( entry point which will be runned ) for displaying the main menu and redirecting to each option
+            function found inthe  other file ( of the DB Operation : Create , List , Connect , Drop )
+
+- db_operations.sh : This file is for DB Operations : Create , List , Connect , Drop
+
+- table_menu.sh : This file is for the sub menu after connecting to specific DB ( Create table , ... etc )
+
+- validation.sh : This file is for data validation upon inserting , updating ( data types , primary key )
+
+- tables-operations.sh : This file is for tables CRUD Operations : Create , List , Update , Drop
+
+- records-columns-operations.sh :  This file is for records CRUD Operations : Insert , Select , Delete
+
