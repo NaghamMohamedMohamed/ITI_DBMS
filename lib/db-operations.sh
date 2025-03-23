@@ -1,13 +1,7 @@
 #!/bin/bash
-
-
 source ./lib/table-menu.sh
-
+source ./lib/validations.sh
 DB_PATH="./Databases"
-source ./validations.sh
-create_db() {
-    DB_PATH="./Databases"
-
 
 # Function to create a new database
 create_db() 
@@ -20,12 +14,15 @@ create_db()
     while true; do
         echo -e "Enter the name of the database or press 'q' to quit:"
         read dbname
-
         # Check if user wants to quit
         if [[ $dbname == "q" ]]; then
             echo "Exiting database creation..."
             break
         fi
+
+#########
+#validate db name
+################
 
         # Check if the database already exists
         if [[ -d "$DB_PATH/$dbname" ]]; then
@@ -63,7 +60,7 @@ list_db()
 
 
 # Function to connect to a database (calls table operations menu)
-connect_to_db ()
+connect_to_db()
 {
     read -p "Enter the database name to connect : " db_name
     if [[ -d "$DB_PATH/$db_name" ]]; then
@@ -82,16 +79,33 @@ connect_to_db ()
 
 
 # Function to drop/delete a database
-drop_db ()
+drop_db()
 {
     read -p "Enter database name to delete : " db_name
-    if [[ -d "$DB_PATH/$db_name" ]]; then
-        rm -r "$DB_PATH/$db_name"
-        echo
-        echo "Database '$db_name' was deleted successfully."
-    else
-        echo
-        echo "Database does not exist!"
-    fi
+######
+#validate db name
+#########
+   if [[ ! -d "$DB_PATH/$db_name" ]]; then
+    echo "Database '$db_name' does not exist!"
+    return 1
+fi
+
+while true; do
+    read -p "Are you sure you want to delete '$db_name'? (y/n): " confirm
+    case "$confirm" in
+        [Yy]) 
+            rm -r "$DB_PATH/$db_name"
+            echo "Database '$db_name' deleted successfully."
+            break
+            ;;
+        [Nn]) 
+            echo "Deletion cancelled."
+            break
+            ;;
+        *)
+            echo "Invalid input. Please enter 'y' for Yes or 'n' for No."
+            ;;
+    esac
+done
 }
 
