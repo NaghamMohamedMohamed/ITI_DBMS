@@ -1,6 +1,5 @@
-# This file is for DB Operations : Create , List , Connect , Drop
 #!/bin/bash
-
+source ./validations.sh
 create_db() {
     DB_PATH="./Databases"
 
