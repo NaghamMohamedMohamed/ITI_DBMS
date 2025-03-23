@@ -69,7 +69,6 @@ connect_to_db ()
         export db_name
 
         sleep 1
-        clear
         sub_menu
 
     else
