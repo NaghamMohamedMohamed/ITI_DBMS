@@ -23,10 +23,10 @@ create_db()
 
         # Validate database name (case-insensitive check)
         if database_exists "$dbname"; then
-            echo "⚠️ Database '$dbname' already exists!"
+            echo "Database '$dbname' already exists!"
         else
             mkdir "$DB_PATH/$dbname"
-            echo "✅ Database '$dbname' was created successfully!"
+            echo "Database '$dbname' was created successfully!"
         fi
     done
 }
