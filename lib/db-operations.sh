@@ -1,6 +1,6 @@
 #!/bin/bash
 source ./lib/table-menu.sh
-source ./lib/validations.sh
+source ./lib/validation.sh
 DB_PATH="./Databases"
 
 # Function to create a new database
@@ -21,12 +21,19 @@ create_db()
             break
         fi
 
+        # Check if input is empty
+        if [[ -z "$dbname" ]]; then
+            echo "Error: Database name cannot be empty! Please enter a valid name."
+            continue  # Restart loop
+        fi
+
         # Validate database name (case-insensitive check)
         if database_exists "$dbname"; then
             echo "Database '$dbname' already exists!"
         else
             mkdir "$DB_PATH/$dbname"
             echo "Database '$dbname' was created successfully!"
+            break
         fi
     done
 }
@@ -52,7 +59,7 @@ list_db()
         echo "No Databases Found!"
     else
         echo "List of Databases :"
-        echo "- $databases"
+        echo "$databases"
     fi
 }
 
