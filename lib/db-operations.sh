@@ -58,8 +58,15 @@ list_db()
     if [[ -z "$databases" ]]; then
         echo "No Databases Found!"
     else
-        echo "List of Databases :"
-        echo "$databases"
+        # echo "List of Databases :"
+        # echo "$databases"
+        echo "List of Databases:"
+        i=1
+        # Loop through each database and number it
+        echo "$databases" | while read db; do
+            echo "$i. $db"
+            ((i++))
+        done
     fi
 }
 
