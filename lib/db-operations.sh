@@ -12,8 +12,7 @@ create_db()
     fi
 
     while true; do
-        echo -e "Enter the name of the database or press 'q' to quit:"
-        read dbname
+        read -p "Enter the name of the database or press 'q' to quit : " dbname
 
         # Check if user wants to quit
         if [[ $dbname == "q" ]]; then
@@ -24,17 +23,27 @@ create_db()
         # Check if input is empty
         if [[ -z "$dbname" ]]; then
             echo "Error: Database name cannot be empty! Please enter a valid name."
-            continue  # Restart loop
+            # Restart loop
+            continue  
         fi
 
-        # Validate database name (case-insensitive check)
-        if database_exists "$dbname"; then
-            echo "Database '$dbname' already exists!"
-        else
-            mkdir "$DB_PATH/$dbname"
-            echo "Database '$dbname' was created successfully!"
-            break
-        fi
+        # Validate database name and check if it exists
+        
+        # Replace the space in the DB name with underscore ( _ )
+        dbname="${dbname// /_}"
+
+        validate_db "$dbname"
+        case $? in
+            0) 
+                echo "Database '$dbname' already exists!"
+                echo ;;
+            1)
+                mkdir "$DB_PATH/$dbname"
+                echo
+                echo "Database '$dbname' is created successfully!"
+                break
+                ;;
+        esac
     done
 }
 
@@ -58,8 +67,6 @@ list_db()
     if [[ -z "$databases" ]]; then
         echo "No Databases Found!"
     else
-        # echo "List of Databases :"
-        # echo "$databases"
         echo "List of Databases:"
         i=1
         # Loop through each database and number it
@@ -71,53 +78,61 @@ list_db()
 }
 
 
-# Function to connect to a database (calls table operations menu)
-connect_to_db()
+# Function to connect to a database ( then calls table operations menu )
+connect_to_db() 
 {
     read -p "Enter the database name to connect : " db_name
-    if [[ -d "$DB_PATH/$db_name" ]]; then
-        echo
-        echo "Connected to database : $db_name"
-        export db_name
 
-        sleep 1
-        sub_menu
+    # Validate database name and check if it exists
+    validate_db "$db_name"
+    case $? in
+        1)
+            echo "Database '$db_name' is not found!"
+            echo ;;
+        0) 
+            cd "$DB_PATH/$db_name"
+            echo
+            echo "Connected successfully to '$db_name' database. You are now inside its folder."
 
-    else
-        echo
-        echo "Database does not exist!"
-    fi
+            sleep 1
+            sub_menu ;;
+    esac
 }
 
 
+
 # Function to drop/delete a database
-drop_db()
+drop_db() 
 {
-    read -p "Enter database name to delete : " db_name
+    read -p "Enter database name to delete: " dbName
+    echo
 
-    # Validate database name (case-insensitive check)
-    if ! database_exists "$db_name"; then
-        echo "Database '$db_name' does not exist!"
-        return 1
-    fi
-
-    while true; do
-        read -p "Are you sure you want to delete '$db_name'? (y/n): " confirm
-        case "$confirm" in
-            [Yy]) 
-                rm -r "$DB_PATH/$db_name"
-                echo "Database '$db_name' deleted successfully."
-                break
-                ;;
-            [Nn]) 
-                echo "Deletion cancelled."
-                break
-                ;;
-            *)
-                echo "Invalid input. Please enter 'y' for Yes or 'n' for No."
-                ;;
-        esac
-    done
+    # Validate database name
+    validate_db "$dbName"
+    case $? in
+        1)
+            echo "Database '$dbName' is not found!"
+            echo ;;
+        0) 
+            while true; do
+                read -p "Are you sure you want to delete '$dbName'? (y/n) : " confirm
+                echo
+                case "$confirm" in
+                    [Yy]) 
+                        rm -r "$DB_PATH/$dbName"
+                        echo "Database '$dbName' is deleted successfully."
+                        break
+                        ;;
+                    [Nn]) 
+                        echo "Deletion is cancelled."
+                        break
+                        ;;
+                    *) 
+                        echo "Invalid input. Please enter 'y' for Yes or 'n' for No.";;
+                esac
+            done
+            ;;
+    esac
 }
 
 

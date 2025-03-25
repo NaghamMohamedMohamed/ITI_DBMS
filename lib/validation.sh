@@ -1,19 +1,31 @@
-# This file is for data validation ( data types , primary key )
 #!/bin/bash
 
-# Function to check if a database exists (case-insensitive)
-database_exists() {
+
+# Function to validate DB before creation , connection , dropping.
+validate_db() 
+{
+    # A local variable to store the db name passedas an argument to this fucntion
     local dbname="$1"
-    #convert the entered dB name to lowercase
+
+    # Validate database name
+    if [[ ! "$dbname" =~ ^[a-zA-Z][a-zA-Z0-9_]*$ ]]; then
+        echo "Invalid database name. It must start with a letter and contain only letters, numbers, and underscores."
+        echo
+        return 0
+    fi
+
+    
+    # Convert db name to lowercase
     local dbname_lower=$(echo "$dbname" | tr '[:upper:]' '[:lower:]')
 
-    #loops through the existing dBs and convert each dB name to lowercase to compare with the entered name
-    for existing_db in "$DB_PATH"/*; do
-        existing_db_name=$(basename "$existing_db" | tr '[:upper:]' '[:lower:]')
-        if [[ "$existing_db_name" == "$dbname_lower" ]]; then
-            return 0  # the dB exists
-        fi
-    done
+    # Validate database pre-existence 
+    if [[ -d "$DB_PATH/$dbname_lower" ]]; then
+        # DB exists
+        echo "Database '$dbname' already exists!"
+        echo
+        return 0
+    fi
 
-    return 1  # dB does not exist
+    return 1
 }
+
