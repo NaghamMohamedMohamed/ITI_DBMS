@@ -1,6 +1,5 @@
-# This file is for tables CRUD Operations : Create , List , Update , Drop
 #!/bin/bash
-source ./validation.sh
+source ./lib/validation.sh
 
 #-----------Creating a new table------------------
 create_table(){
@@ -25,10 +24,10 @@ create_table(){
         fi
 
         #check if the table already exists
-        if [[ -f "$DB_PATH/$DB_NAME/$tablename" ]]; then
+        if [[ -f "$DB_PATH/$db_name/$tablename" ]]; then
             echo "Table '$tablename' already exists!"
         else
-            touch "$DB_PATH/$DB_NAME/$tablename"
+            touch "$DB_PATH/$db_name/$tablename"
             echo "Table '$tablename' created successfully!"
         fi
     done
@@ -36,19 +35,37 @@ create_table(){
 }
 #---------List all existing tables--------------------
 list_tables(){
-    if [[ $(ls -p "$DB_PATH/$DB_NAME" | grep -v / | wc -l) -eq 0 ]]; then
+    if [[ $(ls -p "$DB_PATH/$db_name" | grep -v / | wc -l) -eq 0 ]]; then
         echo "No Tables Found!"
-    fi
-
     else
         echo "List of Tables:"
-        ls -p $DB_PATH/$DB_NAME | grep -v /
+        ls -p $DB_PATH/$db_name | grep -v /
     fi
 }
 
 #-----------Update a table------------------
-update_table(){
 
+update_table(){
+ clear
+ while true; do
+        echo "======================"
+        echo " Update Table Menu "
+        echo "======================"
+        echo "1. Update column name."
+        echo "2. Update a specific record."
+        echo "3. Exit."
+        echo 
+        read -p "Enter your choice: " choice
+        echo
+
+        case $choice in 
+            1) update_column_name ;;
+            2) update_record ;;
+            3) echo "Returning to previous menu..."; break ;;
+            *) echo "Invalid choice. Please try again." ;;
+        esac       
+        echo  
+    done
 }
 
 #-----------Drop a table------------------
@@ -56,7 +73,7 @@ update_table(){
 drop_table() {
     while true; do
         #list all tables in the current database (excluding directories)
-        tables=($(ls -p $DB_PATH/$DB_NAME | grep -v /))
+        tables=($(ls -p $DB_PATH/$db_name | grep -v /))
 
         #if no tables exist, inform the user and exit
         if [[ ${#tables[@]} -eq 0 ]]; then
@@ -92,15 +109,15 @@ drop_table() {
         fi
 
         #create a trash directory to store deleted tables for recovery
-        TRASH_DIR="$DB_PATH/$DB_NAME/trash"
+        TRASH_DIR="$DB_PATH/$db_name/trash"
         mkdir -p "$TRASH_DIR"  
 
         #move the selected table to the trash folder instead of permanently deleting it
-        mv "$DB_PATH/$DB_NAME/$tablename" "$TRASH_DIR/"
+        mv "$DB_PATH/$db_name/$tablename" "$TRASH_DIR/"
         echo "Table '$tablename' moved to trash. Use 'restore_table' to recover it."
 
         #log the deletion event with timestamp and user information
-        LOG_FILE="$DB_PATH/$DB_NAME/deletion.log"
+        LOG_FILE="$DB_PATH/$db_name/deletion.log"
         echo "$(date) - Table '$tablename' deleted by user $USER" >> "$LOG_FILE"
     done
 }
