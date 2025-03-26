@@ -3,7 +3,7 @@ source ./lib/table-menu.sh
 source ./lib/validation.sh
 DB_PATH="./Databases"
 
-# Function to create a new database
+#-----------------Function to create a new database-----------------
 create_db() 
 {
     # Check if the main database directory exists, if not, it is created
@@ -15,7 +15,7 @@ create_db()
         read -p "Enter the name of the database or press 'q' to quit : " dbname
 
         # Check if user wants to quit
-        if [[ $dbname == "q" ]]; then
+        if [[ $dbname == "q" || $dbname == "Q" ]]; then
             echo "Exiting database creation..."
             break
         fi
@@ -28,7 +28,6 @@ create_db()
         fi
 
         # Validate database name and check if it exists
-        
         # Replace the space in the DB name with underscore ( _ )
         dbname="${dbname// /_}"
 
@@ -47,9 +46,7 @@ create_db()
     done
 }
 
-
-
-# Function to list all databases
+#------------------Function to list all databases------------------
 list_db() 
 {
     # Checking if the databases directory exists
@@ -77,62 +74,97 @@ list_db()
     fi
 }
 
+#--------------------Function to connect to a database ( then calls table operations menu )------------------
+connect_to_db() {
+    # Check if databases exist
+    if [[ ! -d "$DB_PATH" || -z "$(ls -A "$DB_PATH")" ]]; then
+        echo "No databases available to connect to."
+        return 1
+    fi
 
-# Function to connect to a database ( then calls table operations menu )
-connect_to_db() 
-{
-    read -p "Enter the database name to connect : " db_name
+    while true; do
+        echo "Available Databases:"
+        echo "===================="
 
-    # Validate database name and check if it exists
-    validate_db "$db_name"
-    case $? in
-        1)
-            echo "Database '$db_name' is not found!"
-            echo ;;
-        0) 
-            cd "$DB_PATH/$db_name"
-            echo
-            echo "Connected successfully to '$db_name' database. You are now inside its folder."
+        # List databases with numbers
+        db_list=($(ls -1 "$DB_PATH")) # Store databases in an array
+        for i in "${!db_list[@]}"; do
+            echo "$((i+1)). ${db_list[i]}"
+        done
 
-            sleep 1
-            sub_menu ;;
-    esac
+        echo "===================="
+        read -p "Enter the number of the database to connect to (or press 'q' to exit): " choice
+
+        # Exit if user presses 'q' or 'Q'
+        if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
+            echo "Operation is canceled."
+            return 0
+        fi
+
+        # Validate input (must be a number within range)
+        if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#db_list[@]} )); then
+            DB_NAME="${db_list[choice-1]}" # Set the chosen database as active
+            cd "$DB_PATH/$DB_NAME"
+            echo "Connected successfully to '$DB_NAME' database. You are now inside its folder."
+
+            # Navigate to table menu
+            export DB_NAME # Make DB_NAME accessible in table-menu.sh
+            sleep 2
+            sub_menu
+            return 0
+        else
+            echo "Invalid choice! Please enter a valid number or 'q' to exit."
+        fi
+    done
+}
+
+#----------------Function to drop/delete a database-----------------
+drop_db() {
+    # Check if there are any databases
+    if [[ ! -d "$DB_PATH" || -z "$(ls -A "$DB_PATH")" ]]; then
+        echo "No databases available to drop."
+        return 1
+    fi
+
+    while true; do
+        echo "Available Databases:"
+        echo "===================="
+
+        # List databases with numbers
+        db_list=($(ls -1 "$DB_PATH")) # Store databases in an array
+        for i in "${!db_list[@]}"; do
+            echo "$((i+1)). ${db_list[i]}"
+        done
+
+        echo "===================="
+        read -p "Enter the number of the database to drop (or press 'q' to exit): " choice
+
+        # Check if user wants to quit
+        if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
+            echo "Operation is canceled."
+            return 0
+        fi
+
+        # Validate input (must be a number within range)
+        if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#db_list[@]} )); then
+            db_to_delete="${db_list[choice-1]}"
+            
+            # Confirm deletion
+            read -p "Are you sure you want to delete '$db_to_delete'? (y/N): " confirm
+            if [[ "$confirm" =~ ^[Yy]$ ]]; then
+                rm -r "$DB_PATH/$db_to_delete"
+                echo "Database '$db_to_delete' deleted successfully!"
+            else
+                echo "Operation is canceled."
+            fi
+            return 0
+        else
+            echo "Invalid choice! Please enter a valid number or 'q' to exit."
+            echo " "
+        fi
+    done
 }
 
 
-
-# Function to drop/delete a database
-drop_db() 
-{
-    read -p "Enter database name to delete: " dbName
-    echo
-
-    # Validate database name
-    validate_db "$dbName"
-    case $? in
-        1)
-            echo "Database '$dbName' is not found!"
-            echo ;;
-        0) 
-            while true; do
-                read -p "Are you sure you want to delete '$dbName'? (y/n) : " confirm
-                echo
-                case "$confirm" in
-                    [Yy]) 
-                        rm -r "$DB_PATH/$dbName"
-                        echo "Database '$dbName' is deleted successfully."
-                        break
-                        ;;
-                    [Nn]) 
-                        echo "Deletion is cancelled."
-                        break
-                        ;;
-                    *) 
-                        echo "Invalid input. Please enter 'y' for Yes or 'n' for No.";;
-                esac
-            done
-            ;;
-    esac
-}
 
 
