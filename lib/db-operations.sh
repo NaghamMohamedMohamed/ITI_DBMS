@@ -28,8 +28,7 @@ create_db()
         fi
 
         # Validate database name and check if it exists
-        # Replace the space in the DB name with underscore ( _ )
-        dbname="${dbname// /_}"
+        
 
         validate_db "$dbname"
         case $? in
@@ -107,9 +106,10 @@ connect_to_db() {
             cd "$DB_PATH/$DB_NAME"
             echo "Connected successfully to '$DB_NAME' database. You are now inside its folder."
 
-            # Navigate to table menu
-            export DB_NAME # Make DB_NAME accessible in table-menu.sh
+            # Make DB_NAME accessible in other files
+            export DB_NAME 
             sleep 2
+            # Navigate to table menu
             sub_menu
             return 0
         else
