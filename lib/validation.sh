@@ -14,11 +14,10 @@ validate_name()
 
     # Validate database/table name
     if [[ ! "$name" =~ ^[a-zA-Z][a-zA-Z0-9_]*$ ]]; then
-        echo
-        echo "Invalid name. It must start with a letter and contain only letters, numbers, and underscores."
-        echo
-        return 2
+        return 0
     fi
+
+    return 1
 
 }
 
@@ -33,6 +32,7 @@ db_isExist()
     for existing_db in "$DB_PATH"/*; do
         existing_db_name=$(basename "$existing_db" | tr '[:upper:]' '[:lower:]')
         if [[ "$existing_db_name" == "$dbname_lower" ]]; then
+            export existing_db
             # The dB exists
             return 0  
         fi
@@ -52,6 +52,7 @@ table_isExist()
     for existing_table in "$DB_PATH"/$DB_NAME*; do
         existing_table_name=$(basename "$existing_table" | tr '[:upper:]' '[:lower:]')
         if [[ "$existing_table_name" == "$tablename_lower" ]]; then
+            export existing_table
             # The table exists
             return 0  
         fi

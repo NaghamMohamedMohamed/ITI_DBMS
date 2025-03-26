@@ -28,12 +28,21 @@ create_db()
         fi
 
         # Validate database name and check if it exists
-        
 
-        validate_db "$dbname"
+        validate_name "$dbname"
         case $? in
             0) 
-                echo "Database '$dbname' already exists!"
+                echo
+                echo "Invalid database name. It must start with a letter and contain only letters, numbers, and underscores."
+                return ;;
+            1)
+                continue ;;
+        esac
+
+        db_isExist "$dbname"
+        case $? in
+            0) 
+                echo "Database '$existing_db' already exists!"
                 echo ;;
             1)
                 mkdir "$DB_PATH/$dbname"
@@ -92,6 +101,7 @@ connect_to_db() {
         done
 
         echo "===================="
+        echo
         read -p "Enter the number of the database to connect to (or press 'q' to exit): " choice
 
         # Exit if user presses 'q' or 'Q'
@@ -104,7 +114,9 @@ connect_to_db() {
         if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#db_list[@]} )); then
             DB_NAME="${db_list[choice-1]}" # Set the chosen database as active
             cd "$DB_PATH/$DB_NAME"
+            echo
             echo "Connected successfully to '$DB_NAME' database. You are now inside its folder."
+            echo
 
             # Make DB_NAME accessible in other files
             export DB_NAME 
