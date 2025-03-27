@@ -49,7 +49,7 @@ table_isExist()
     local tablename_lower=$(echo "$tablename" | tr '[:upper:]' '[:lower:]')
 
     # Loops through the existing tabless and convert each dB name to lowercase to compare with the entered name
-    for existing_table in "$DB_PATH"/$DB_NAME*; do
+    for existing_table in "$DB_PATH/$DB_NAME"/*; do
         existing_table_name=$(basename "$existing_table" | tr '[:upper:]' '[:lower:]')
         if [[ "$existing_table_name" == "$tablename_lower" ]]; then
             export existing_table
