@@ -1,124 +1,196 @@
 #!/bin/bash
 source ./lib/validation.sh
+DB_PATH="./Databases"
 
-#-----------Creating a new table------------------
-create_table(){
+# Function to create a new table
+create_table() {
     while true; do
-        echo -e "Enter the name of the table or press 'q' to quit:"
-        read tablename
+        read -p "Enter the name of the table or press 'q' to quit: " tablename
 
-        #check if user wants to quit
-        if [[ $tablename == "q" ]]; then
-            echo "Exiting table creation..."
-            break
+        # Check if user wants to quit
+        if [[ $tablename == "q" || $tablename == "Q" ]]; then
+            echo "Exiting table creation operation..."
+            echo
+            return
         fi
 
-##########
-#to be added: validate table name (no spaces, only letters, numbers, and underscores)
-##########
-
-        #check if the table name is empty
+        # Check if the table name is empty
         if [[ -z "$tablename" ]]; then
             echo "Table name cannot be empty!"
+            echo
             continue
         fi
 
-        #check if the table already exists
-        if [[ -f "$DB_PATH/$db_name/$tablename" ]]; then
-            echo "Table '$tablename' already exists!"
+        validate_name "$tablename"
+        case $? in
+            0) 
+                echo
+                echo "Invalid table name. It must start with a letter and contain only letters, numbers, and underscores."
+                echo
+                return ;;
+        esac
+
+        table_isExist "$tablename"
+        case $? in
+            0)  
+                echo
+                echo "Table '$tablename' already exists!"
+                echo
+                return ;;  # If table exists, exit function
+        esac
+
+        # If we reach here, the table name is valid and does not exist -> break loop
+        break
+    done
+
+    # Loop until user enters a valid number of columns
+    while true; do
+        read -p "Enter the number of columns: " num_columns
+        if [[ "$num_columns" =~ ^[1-9][0-9]*$ ]]; then
+            break  # Valid input, exit loop
         else
-            touch "$DB_PATH/$db_name/$tablename"
-            echo "Table '$tablename' created successfully!"
+            echo "Invalid number of columns. Please enter a positive integer."
         fi
     done
 
+    # Store column metadata
+    columns=()
+    types=()
+
+    for ((i=1; i<=num_columns; i++)); do
+        read -p "Enter name of column $i: " col_name
+        validate_name "$col_name"
+        case $? in
+            0) 
+                echo
+                echo "Invalid column name. It must start with a letter and contain only letters, numbers, and underscores."
+                return ;;
+        esac
+
+        col_isExist "$col_name"
+        case $? in
+            0)  
+                echo
+                echo "Column '$col_name' already exists!"
+                echo ;;    
+        esac
+
+        # Choose data type with validation
+        while true; do
+            echo "Choose data type for '$col_name':"
+            echo "1. int"
+            echo "2. string"
+            echo
+            read -p "Enter choice (1 or 2): " col_type
+            echo
+
+            if [[ "$col_type" == "1" ]]; then
+                col_type="int"
+                break
+            elif [[ "$col_type" == "2" ]]; then
+                col_type="string"
+                break
+            else
+                echo "Invalid choice. Please enter 1 or 2."
+                echo
+            fi
+        done
+
+        # Store column metadata
+        columns+=("$col_name")
+        types+=("$col_type")
+    done
+
+    # Ask user to select the primary key column
+    echo
+    echo "Select the primary key column:"
+    select primary_key in "${columns[@]}"; do
+        if [[ -n "$primary_key" ]]; then
+            break
+        else
+            echo "Invalid selection. Please choose a valid column."
+        fi
+    done
+
+    touch "$tablename"
+    # Store column names and types in the table file
+    {
+        echo "${columns[*]}"
+        echo "${types[*]}"
+        echo "PrimaryKey: $primary_key"
+    } > "$tablename"
+
+    echo
+    echo "Table '$tablename' created successfully with primary key '$primary_key'!"
 }
+
+
 #---------List all existing tables--------------------
-list_tables(){
-    if [[ $(ls -p "$DB_PATH/$db_name" | grep -v / | wc -l) -eq 0 ]]; then
+list_tables() {
+    # Store the list of tables in an array
+    local tables=($(ls | grep -v /)) # lists only files (tables)
+
+    # Check if tables exist
+    if [[ ${#tables[@]} -eq 0 ]]; then
         echo "No Tables Found!"
     else
         echo "List of Tables:"
-        ls -p $DB_PATH/$db_name | grep -v /
+        for i in "${!tables[@]}"; do
+            echo "$((i + 1)). ${tables[$i]}" # Display tables with numbering
+        done
     fi
 }
 
 #-----------Update a table------------------
 
-update_table(){
- clear
- while true; do
-        echo "======================"
-        echo " Update Table Menu "
-        echo "======================"
-        echo "1. Update column name."
-        echo "2. Update a specific record."
-        echo "3. Exit."
-        echo 
-        read -p "Enter your choice: " choice
-        echo
-
-        case $choice in 
-            1) update_column_name ;;
-            2) update_record ;;
-            3) echo "Returning to previous menu..."; break ;;
-            *) echo "Invalid choice. Please try again." ;;
-        esac       
-        echo  
-    done
-}
-
 #-----------Drop a table------------------
-
 drop_table() {
     while true; do
-        #list all tables in the current database (excluding directories)
-        tables=($(ls -p $DB_PATH/$db_name | grep -v /))
+        # List all tables (excluding metadata files)
+        tables=($(ls | grep -Ev "/|@meta$"))
 
-        #if no tables exist, inform the user and exit
+        # If no tables exist, inform the user and exit
         if [[ ${#tables[@]} -eq 0 ]]; then
             echo "No tables found in the database!"
-            break
+            return
         fi
-
-        #display available tables with numbering
-        echo "Tables in the database:"
+        echo
+        # Display available tables with numbering
+        echo "Tables in the '$DB_NAME' database:"
         for i in "${!tables[@]}"; do
             echo "$(($i + 1)). ${tables[$i]}"
         done
 
-        #ask the user to select a table by number or quit
-        echo -e "Enter the number of the table to drop or 'q' to quit:"
-        read choice
+        # Ask the user to select a table by number or quit
+        echo
+        read -p "Enter the number of the table to drop (or press 'q' to exit):" choice        
 
-        #check if the user wants to exit
-        if [[ $choice == "q" ]]; then
+        # Check if the user wants to exit
+        if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
             echo "Exiting table deletion..."
-            break
+            return
         fi
 
-###################
-        #to be added: validate if the choice is a valid number within the table list range
-###################
-
-        #confirm the user wants to delete the table
-        read -p "Are you sure you want to delete '$tablename'? (y/n): " confirm
-        if [[ $confirm != [Yy] ]]; then
-            echo "Table deletion canceled."
+        # Validate if choice is a number within range
+        if ! [[ "$choice" =~ ^[0-9]+$ ]] || ((choice < 1 || choice > ${#tables[@]})); then
+            echo
+            echo "Invalid input. Please enter a valid table number."
+            echo
             continue
         fi
 
-        #create a trash directory to store deleted tables for recovery
-        TRASH_DIR="$DB_PATH/$db_name/trash"
-        mkdir -p "$TRASH_DIR"  
+        # Get the selected table name
+        tablename="${tables[$((choice - 1))]}"
 
-        #move the selected table to the trash folder instead of permanently deleting it
-        mv "$DB_PATH/$db_name/$tablename" "$TRASH_DIR/"
-        echo "Table '$tablename' moved to trash. Use 'restore_table' to recover it."
+        # Confirm deletion
+        read -p "Are you sure you want to delete '$tablename'? (y/n): " confirm
+        echo
+        if [[ "$confirm" != [Yy] ]]; then
+            echo "Table deletion canceled."
+            return
+        fi
+        rm $tablename
+        echo "Table $tablename is deleted successfully!"
 
-        #log the deletion event with timestamp and user information
-        LOG_FILE="$DB_PATH/$db_name/deletion.log"
-        echo "$(date) - Table '$tablename' deleted by user $USER" >> "$LOG_FILE"
     done
 }
-
