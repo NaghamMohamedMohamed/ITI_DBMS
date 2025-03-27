@@ -61,3 +61,22 @@ table_isExist()
     return 1
 }
 
+
+# Function to validate column existence before creation
+col_isExist()
+{
+    # Convert db/table name to lowercase
+    local colname_lower=$(echo "$col_name" | tr '[:upper:]' '[:lower:]')
+
+    #loops through the existing dBs and convert each dB name to lowercase to compare with the entered name
+    for existing_cols in "$DB_PATH"/$DB_NAME*; do
+        existing_col_name=$(basename "$existing_cols" | tr '[:upper:]' '[:lower:]')
+        if [[ "$existing_col_name" == "$colname_lower" ]]; then
+            export existing_col
+            # The column exists
+            return 0  
+        fi
+    done
+   
+    return 1
+}
