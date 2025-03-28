@@ -123,7 +123,9 @@ connect_to_db() {
             sub_menu
             return 0
         else
+            echo
             echo "Invalid choice! Please enter a valid number or 'q' to exit."
+            echo
         fi
     done
 }
@@ -147,7 +149,9 @@ drop_db() {
         done
 
         echo "===================="
+        echo
         read -p "Enter the number of the database to drop (or press 'q' to exit): " choice
+        echo
 
         # Check if user wants to quit
         if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
@@ -169,8 +173,9 @@ drop_db() {
             fi
             return 0
         else
+            echo
             echo "Invalid choice! Please enter a valid number or 'q' to exit."
-            echo " "
+            echo 
         fi
     done
 }
