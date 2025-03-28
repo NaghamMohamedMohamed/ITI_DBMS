@@ -80,3 +80,35 @@ col_isExist()
    
     return 1
 }
+
+# Function to read the data types of the columns in a table from the @meta file
+get_data_types() 
+{
+    local tablename=$1
+    local data_type=$(sed -n '2p' "$tablename"@meta)
+    echo "$data_type"
+}
+
+# Function to validate the data type of the column
+validate_data_type() 
+{
+    local col_number=$1
+    local new_value=$2
+    local data_type=$(get_data_types "$tablename")
+    col_type=$(echo "$data_type" | awk -F':' -v col="$col_number" '{print $col}')
+    
+    case $col_type in
+        "Int")
+            if ! [[ "$new_value" =~ ^[0-9]+$ ]]; then
+                echo "Invalid input. Column $colNumber can only contain numerical values."
+                return 1
+            fi
+            ;;
+        "String")
+            ;;
+        *)
+            echo "Unregistered data type for column $col_number."
+            return 1
+            ;;
+    esac
+}
