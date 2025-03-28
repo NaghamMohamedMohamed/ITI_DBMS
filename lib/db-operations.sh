@@ -35,8 +35,6 @@ create_db()
                 echo
                 echo "Invalid database name. It must start with a letter and contain only letters, numbers, and underscores."
                 return ;;
-            1)
-                continue ;;
         esac
 
         db_isExist "$dbname"
