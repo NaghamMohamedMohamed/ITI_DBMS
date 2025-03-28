@@ -100,7 +100,8 @@ validate_data_type()
     case $col_type in
         "Int")
             if ! [[ "$new_value" =~ ^[0-9]+$ ]]; then
-                echo "Invalid input. Column $colNumber can only contain numerical values."
+                echo "Invalid input. Column $col_number can only contain numerical values."
+                echo
                 return 1
             fi
             ;;
@@ -108,6 +109,7 @@ validate_data_type()
             ;;
         *)
             echo "Unregistered data type for column $col_number."
+            echo
             return 1
             ;;
     esac
