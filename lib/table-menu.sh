@@ -1,7 +1,6 @@
 #!/bin/bash  
 
 # Import the tables & records/Columns functions
-source ../dbms.sh
 source ./lib/tables-operations.sh 
 source ./lib/records-columns-operations.sh
 
@@ -40,7 +39,6 @@ function sub_menu
                 echo "Returning To The Main Menu..."
                 sleep 1
                 clear
-                main_menu 
                 return
                 ;;
             *) echo "Invalid choice. Please try again." ;;
