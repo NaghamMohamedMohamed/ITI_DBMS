@@ -94,13 +94,14 @@ validate_data_type()
 {
     local col_number=$1
     local new_value=$2
-    local data_type=$(get_data_types "$tablename")
+    # local data_type=$(get_data_types "$tablename")
+    local data_type=$(sed -n '2p' "$tablename@meta")
     col_type=$(echo "$data_type" | awk -F':' -v col="$col_number" '{print $col}')
     
     case $col_type in
         "Int")
             if ! [[ "$new_value" =~ ^[0-9]+$ ]]; then
-                echo "Invalid input. Column $col_number can only contain numerical values."
+                echo "Invalid input. This column can only contain numerical values."
                 echo
                 return 1
             fi
@@ -108,9 +109,10 @@ validate_data_type()
         "String")
             ;;
         *)
-            echo "Unregistered data type for column $col_number."
+            echo "Unregistered data type."
             echo
             return 1
             ;;
     esac
+    return 0
 }
