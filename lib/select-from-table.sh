@@ -149,37 +149,3 @@ select_by_cellValue()
         echo "${result[*]}" | sed 's/ / | /g'
     fi
 }
-
-
-# A function to display table deletion options
-delete_from_table()
-{
-    # If table selection fails, exit
-    get_table || return   
- 
-    while true; do
-        echo
-        echo "==========================="
-        echo "  Delete From Table Menu "
-        echo "==========================="
-        echo "1) Delete Row."
-        echo "2) Delete Column."
-        echo "3) Delete a specific cell value ( Replacing with Null )."
-        echo "4) Exit."
-        echo
-        read -p "Enter your choice : " choice
-        echo
-
-        case $choice in
-            1) delete_row "$tablename" ;;
-            2) delete_column "$tablename" ;;
-            3) delete_cellValue "$tablename" ;;
-            4) echo "Returning to the previous sub-menu...";  
-                sleep 1
-                clear
-                return ;;
-            *) echo "❌ Invalid choice. Please try again." echo ;;
-        esac
-    done
-            
-}
