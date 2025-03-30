@@ -22,13 +22,14 @@ create_db()
 
         # Check if input is empty
         if [[ -z "$dbname" ]]; then
-            echo "Error: Database name cannot be empty! Please enter a valid name."
+            echo "Database name cannot be empty! Please enter a valid name."
             # Restart loop
             continue  
         fi
 
-        # Validate database name and check if it exists
+        dbname="${dbname// /_}"
 
+        # Validate database name and check if it exists
         validate_name "$dbname"
         case $? in
             0) 
@@ -164,7 +165,7 @@ drop_db() {
             db_to_delete="${db_list[choice-1]}"
             
             # Confirm deletion
-            read -p "Are you sure you want to delete '$db_to_delete'? (y/N): " confirm
+            read -p "Are you sure you want to delete '$db_to_delete'? (y/n): " confirm
             if [[ "$confirm" =~ ^[Yy]$ ]]; then
                 rm -r "$DB_PATH/$db_to_delete"
                 echo "Database '$db_to_delete' deleted successfully!"
