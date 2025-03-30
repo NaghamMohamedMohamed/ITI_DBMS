@@ -1,8 +1,14 @@
 #!/bin/bash  
 
-# Import the tables & records/Columns functions
-source ./lib/tables-operations.sh 
-source ./lib/records-columns-operations.sh
+# Import the tables & records/Columns/Cells functions
+source ./lib/create-table.sh
+source ./lib/list-tables.sh
+source ./lib/update-table.sh
+source ./lib/drop-table.sh 
+
+source ./lib/insert-into-table.sh
+source ./lib/select-from-table.sh
+source ./lib/delete-from-table.sh
 
 
 # The sub menu for table , records , columns operations after connecting to specific DB
